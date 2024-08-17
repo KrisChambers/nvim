@@ -5,6 +5,8 @@ require("me.lazy_init")
 local augroup = vim.api.nvim_create_augroup
 local me = augroup('me', {})
 
+-- load the snippet folder
+require('luasnip.loaders.from_snipmate').load({paths={"./snippets"}})
 
 local create_autocmd = vim.api.nvim_create_autocmd
 local yank_group = augroup('HighlightYank', {})
@@ -13,7 +15,7 @@ function R(name)
     require("plenary.reload").reload_module(name)
 end
 
--- Makes it so yanking shows what is being yanked.
+-- Makes it so yanking shows what is being yanked with a flash of the selection.
 create_autocmd('TextYankPost', {
     group = yank_group,
     pattern = '*',
@@ -32,16 +34,45 @@ create_autocmd({"BufWritePre"}, {
     command = [[%s/\s\+$//e]],
 })
 
+
+--
+-- TOFU / TERRAFORM Specific
+--
+
 create_autocmd({"BufWritePre"}, {
+    desc = "Format tofu / terraform files on save",
     group = me,
-    pattern = {"*.test"},
+    pattern = {"*.test"}, -- TODO (kc): Test this out on other things
+
     callback = function (e)
         -- We want to run the terraform fmt before we save
-
-
+        -- TODO (kc): This should be similar to the format on save for python files
+        local filename = vim.api.nvim_buf_get_name(0)
+        -- vim.cmd(":silent !tofu fmt " .. filename)
     end
 })
 
+
+--
+-- PYTHON specific
+--
+
+-- Note (kc): On save of python files we want to format the file with black.
+create_autocmd('BufWritePost', { -- TODO (kc): Should the be Pre write and not Post write?
+    desc = "Format python files with black",
+    pattern = {"*.py"},
+    group = me,
+
+    callback = function ()
+        local filename = vim.api.nvim_buf_get_name(0)
+        vim.cmd(":silent !black " .. filename)
+    end
+})
+
+
+--
+-- GENERIC LSP SPECIFIC
+--
 create_autocmd('LspAttach', {
     group = me,
     callback = function(e)
@@ -59,6 +90,27 @@ create_autocmd('LspAttach', {
     end
 })
 
+--create_autocmd('BufEnter', {
+--    group = me,
+--
+--    callback = function ()
+--
+--    end
+--})
+
+create_autocmd('BufEnter', {
+    group = me,
+    callback = function (e)
+        local opts = { buffer = e.buf }
+        vim.keymap.set("v", "<leader>be", function ()
+            vim.api.nvim_cmd({
+                cmd =[["ty]]
+            },{ })
+        end, opts)
+    end
+})
+
+
 vim.g.netrw_browse_split = 0
 vim.g.netrw_banner = 0
 vim.g.netrw_winsize = 25
@@ -71,4 +123,4 @@ local function print_plugins()
     end
   end
 end
-print_plugins()  -- Comment or uncomment to toggle the output
+--print_plugins()  -- Comment or uncomment to toggle the output
