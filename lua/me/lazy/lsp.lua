@@ -25,6 +25,7 @@ return {
         require("fidget").setup({})
         require("mason").setup()
         require("mason-lspconfig").setup({
+            automatic_installation = false,
             ensure_installed = {
                 "lua_ls",
                 -- rust
@@ -33,13 +34,34 @@ return {
                 "pyright",
                 -- terraform language servers
                 "terraformls",
-                "tflint"
             },
             handlers = {
                 function(server_name) -- default handler (optional)
                     require("lspconfig")[server_name].setup {
                         capabilities = capabilities
                     }
+                end,
+
+                ["rust_analyzer"] = function ()
+                    local lspconfig = require("lspconfig")
+
+                    lspconfig.rust_analyzer.setup {
+                        capabilities = capabilities
+                    }
+
+                    for _, method in ipairs({ 'textDocument/diagnostic', 'workspace/diagnostic' }) do
+                        local default_diagnostic_handler = vim.lsp.handlers[method]
+
+                        -- NOTE (kc): There is a weird error where the lsp is canceling some request which causes some issues.
+                        -- This wraps the handler and doesn't return an error for the diagnostics
+                        vim.lsp.handlers[method] = function(err, result, context, config)
+                            if err ~= nil and err.code == -32802 then
+                                return
+                            end
+                            return default_diagnostic_handler(err, result, context, config)
+                        end
+
+                    end
                 end,
 
                 ["lua_ls"] = function()
@@ -56,11 +78,15 @@ return {
                         }
                     }
                 end,
+
+                ["terraformls"] = function ()
+                    local lspconfig = require("lspconfig")
+                    lspconfig.terraformls.setup({})
+                end
             }
         })
 
         local cmp_select = { behavior = cmp.SelectBehavior.Select }
-
         cmp.setup({
             snippet = {
                 expand = function(args)
@@ -87,7 +113,7 @@ return {
                 focusable = false,
                 style = "minimal",
                 border = "rounded",
-                source = "always",
+                source = true,
                 header = "",
                 prefix = "",
             },
