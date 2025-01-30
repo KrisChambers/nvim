@@ -82,6 +82,24 @@ return {
                 ["terraformls"] = function ()
                     local lspconfig = require("lspconfig")
                     lspconfig.terraformls.setup({})
+                end,
+
+                ["jinja_lsp"] = function ()
+                    -- Need to recognize jinja filetypes
+                    local jinja_filetype = 'jinja'
+                    vim.filetype.add {
+                        extension = {
+                            jinja = jinja_filetype,
+                            jinja2 = jinja_filetype,
+                            j2 = jinja_filetype
+                        }
+                    }
+
+                    local lspconfig = require('lspconfig')
+                    lspconfig.jinja_lsp.setup {
+                        capabilities = capabilities,
+                    }
+
                 end
             }
         })
