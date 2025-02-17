@@ -22,6 +22,10 @@ return {
             vim.lsp.protocol.make_client_capabilities(),
             cmp_lsp.default_capabilities())
 
+        local function get_lspconfig()
+            return require("lspconfig")
+        end
+
         require("fidget").setup({})
         require("mason").setup()
         require("mason-lspconfig").setup({
@@ -41,8 +45,14 @@ return {
                         capabilities = capabilities
                     }
                 end,
+                ["hls"] = function()
+                    get_lspconfig().hls.setup {
+                        capabilities = capabilities,
+                        filetypes = { 'haskell', 'lhaskell', 'cabal' }
+                    }
+                end,
 
-                ["rust_analyzer"] = function ()
+                ["rust_analyzer"] = function()
                     local lspconfig = require("lspconfig")
 
                     lspconfig.rust_analyzer.setup {
@@ -60,7 +70,6 @@ return {
                             end
                             return default_diagnostic_handler(err, result, context, config)
                         end
-
                     end
                 end,
 
@@ -79,12 +88,12 @@ return {
                     }
                 end,
 
-                ["terraformls"] = function ()
+                ["terraformls"] = function()
                     local lspconfig = require("lspconfig")
                     lspconfig.terraformls.setup({})
                 end,
 
-                ["jinja_lsp"] = function ()
+                ["jinja_lsp"] = function()
                     -- Need to recognize jinja filetypes
                     local jinja_filetype = 'jinja'
                     vim.filetype.add {
@@ -99,7 +108,6 @@ return {
                     lspconfig.jinja_lsp.setup {
                         capabilities = capabilities,
                     }
-
                 end
             }
         })
