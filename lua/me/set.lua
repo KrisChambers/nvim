@@ -30,5 +30,6 @@ vim.opt.colorcolumn = "120"
 
 -- We should think about how we want this to work
 -- NOTE (kc): The default is to use just a block everywhere. Ideally our cursor indicates what state our editor is in
-vim.opt.guicursor = "n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50,a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor,sm:block-blinkwait175-blinkoff150-blinkon175"
+-- TODO Lets make the cursor different colors for insert, normal, visual, visual selection, replace
+vim.opt.guicursor = "n-v-c:block,i-ci-ve:ver100,r-cr:hor20,o:hor50,a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor,sm:block-blinkwait175-blinkoff150-blinkon175"
 
