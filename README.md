@@ -2,7 +2,7 @@
 
 My NeoVim dotfiles
 
-# Plugins not all necessarily enabled
+# Plugins:
 
 ## Avante
 Cursor like AI Assistant.
