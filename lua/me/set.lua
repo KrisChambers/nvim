@@ -26,7 +26,7 @@ vim.opt.isfname:append("@-@")
 
 vim.opt.updatetime = 50
 
-vim.opt.colorcolumn = "120"
+--vim.opt.colorcolumn = "120"
 
 -- We should think about how we want this to work
 -- NOTE (kc): The default is to use just a block everywhere. Ideally our cursor indicates what state our editor is in
