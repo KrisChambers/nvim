@@ -6,6 +6,7 @@ return {
             group = MyFugitive,
             pattern = "*",
             callback = function()
+                -- Make sure we are in a fugitive buffer
                 if vim.bo.ft ~= "fugitive" then
                     return
                 end
