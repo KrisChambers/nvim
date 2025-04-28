@@ -1,6 +1,7 @@
 require("me.set")
 require("me.remaps")
 require("me.lazy_init")
+-- require("me.experiments")
 
 local augroup = vim.api.nvim_create_augroup
 local me = augroup('me', {})
@@ -54,7 +55,7 @@ create_autocmd({ "BufWritePre" }, {
 -- PYTHON specific
 --]]
 create_autocmd('BufWritePost', { -- TODO (kc): Should the be Pre write and not Post write?
-    desc = "Format python files with black",
+    desc = "Format python files with ruff",
     pattern = { "*.py" },
     group = me,
 
