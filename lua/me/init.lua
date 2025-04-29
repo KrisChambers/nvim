@@ -54,14 +54,15 @@ create_autocmd({ "BufWritePre" }, {
 --[[
 -- PYTHON specific
 --]]
-create_autocmd('BufWritePost', { -- TODO (kc): Should the be Pre write and not Post write?
+create_autocmd('BufWritePost', {
     desc = "Format python files with ruff",
     pattern = { "*.py" },
     group = me,
 
     callback = function()
         local filename = vim.api.nvim_buf_get_name(0)
-        vim.cmd(":silent !black " .. filename)
+        vim.cmd(":silent !ruff check --select I --fix " .. filename)
+        vim.cmd(":silent !ruff format " .. filename)
     end
 })
 
