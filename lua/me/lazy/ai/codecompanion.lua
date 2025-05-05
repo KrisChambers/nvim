@@ -1,0 +1,65 @@
+return {
+	{
+		"olimorris/codecompanion.nvim",
+        lazy = false,
+		cmd = {
+			'CodeCompanion',
+			'CodeCompanionActions',
+			'CodeCompanionChat',
+			'CodeCompanionCmd',
+		},
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"nvim-treesitter/nvim-treesitter",
+			{
+				"MeanderingProgrammer/render-markdown.nvim",
+				ft = { "codecompanion" }
+			},
+            "echasnovski/mini.diff"
+		},
+		opts = {
+	        strategies = { -- Which LLM to use for specific parts
+				chat = {
+					adapter = "anthropic",
+                    keymaps = {
+                        send = { n = "<C-R>", i = "<C-s>" },
+                        close = { n = "<C-q>", i = "<C-q>" }
+                    }
+				},
+                inline = { adapter = "anthropic", },
+                agent = { adapter = "anthropic" },
+			},
+            adapters = {
+                anthropic = function ()
+                    return require("codecompanion.adapters").extend("anthropic", {
+                        schema = {
+                            model = {
+                                default = "claude-3-7-sonnet-20250219"
+                            }
+                        }
+                    })
+                end
+            },
+			display = {
+                action_palette= {
+                  width = 95,
+                  height = 10,
+                  prompt = "Prompt ", -- Prompt used for interactive LLM calls
+                  provider = "telescope", -- default | telescope | mini_pick. If undefined the plugin will autodetect installed providers.
+                  opts = {
+                    show_default_actions = true, -- Show the default actions in the action palette?
+                    show_default_prompt_library = true, -- Show the default prompt library in the action palette?
+                  },
+                },
+				diff = {
+					provider = "mini_diff",
+				},
+			},
+        },
+        config = function (_, opts)
+            local cc = require("codecompanion")
+            cc.setup(opts)
+            vim.keymap.set("n", "<leader>ch", cc.toggle, {})
+        end
+	},
+}

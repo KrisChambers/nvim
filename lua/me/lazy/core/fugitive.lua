@@ -1,3 +1,6 @@
+---
+--- Adds some git specific functionality.
+---
 return {
     "tpope/vim-fugitive",
     config = function()
@@ -28,8 +31,8 @@ return {
             end,
         })
 
-        vim.keymap.set("n", "<leader>gs", vim.cmd.Git)
-        vim.keymap.set("n", "gu", "<cmd>diffget //2<CR>")
-        vim.keymap.set("n", "gh", "<cmd>diffget //3<CR>")
+        vim.keymap.set("n", "<leader>gs", vim.cmd.Git, {desc = "Open a fugitive buffer"})
+        vim.keymap.set("n", "gu", "<cmd>diffget //2<CR>", {desc = "Apply diffget from the left buffer"})
+        vim.keymap.set("n", "gh", "<cmd>diffget //3<CR>", { desc = "Apply diffget from the right buffer"})
     end
 }
