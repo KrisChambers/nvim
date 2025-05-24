@@ -77,8 +77,6 @@ return {
             return require("lspconfig")
         end
 
-        -- We want inlay hints.
-        vim.lsp.inlay_hint.enable(true, {nil})
 
         local capabilities = get_blink_capabilities()
         --local capabilities = get_nvim_cmp_capabilities()
@@ -87,13 +85,11 @@ return {
         require("mason").setup()
         require("mason-lspconfig").setup({
             automatic_installation = false,
+            automatic_enable = true,
             ensure_installed = {
                 "lua_ls",
-                -- rust
                 "rust_analyzer",
-                -- python This is a wrapper around the one from Microsoft
                 "pyright",
-                -- terraform language servers
                 "terraformls",
             },
             handlers = {
@@ -102,6 +98,7 @@ return {
                         capabilities = capabilities
                     }
                 end,
+
                 ["hls"] = function()
                     get_lspconfig().hls.setup {
                         capabilities = capabilities,
@@ -113,19 +110,21 @@ return {
                     get_lspconfig().rust_analyzer.setup({
                         capabilities = capabilities
                     })
+                    -- We want inlay hints.
+                    vim.lsp.inlay_hint.enable(true, {nil})
 
-                    for _, method in ipairs({ 'textDocument/diagnostic', 'workspace/diagnostic' }) do
-                        local default_diagnostic_handler = vim.lsp.handlers[method]
+                    --for _, method in ipairs({ 'textDocument/diagnostic', 'workspace/diagnostic' }) do
+                    --    local default_diagnostic_handler = vim.lsp.handlers[method]
 
-                        -- NOTE (kc): There is a weird error where the lsp is canceling some request which causes some issues.
-                        -- This wraps the handler and doesn't return an error for the diagnostics
-                        vim.lsp.handlers[method] = function(err, result, context, config)
-                            if err ~= nil and err.code == -32802 then
-                                return
-                            end
-                            return default_diagnostic_handler(err, result, context, config)
-                        end
-                    end
+                    --    -- NOTE (kc): There is a weird error where the lsp is canceling some request which causes some issues.
+                    --    -- This wraps the handler and doesn't return an error for the diagnostics
+                    --    vim.lsp.handlers[method] = function(err, result, context, config)
+                    --        if err ~= nil and err.code == -32802 then
+                    --            return
+                    --        end
+                    --        return default_diagnostic_handler(err, result, context, config)
+                    --    end
+                    --end
                 end,
 
                 ["lua_ls"] = function()
