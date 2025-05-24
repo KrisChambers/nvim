@@ -1,5 +1,5 @@
 function ColorMyWorld(color)
-    color = color or "cyberdream"
+    color = color or "kanagawa"
 
     vim.cmd.colorscheme(color)
 
@@ -11,28 +11,9 @@ end
 
 return {
     {
-        'nyngwang/nvimgelion',
+        'rebelot/kanagawa.nvim',
         config = function()
-            -- ColorMyWorld()
+            ColorMyWorld()
         end
     },
-    {
-        "EdenEast/nightfox.nvim",
-        config = function()
---            ColorMyWorld("nightfox")
-        end
-
-    },
-    {
-        "scottmckendry/cyberdream.nvim",
-        lazy = false,
-        priority = 1000,
-        config = function()
-            require("cyberdream").setup({
-                variant="auto"
-            })
-
-            ColorMyWorld("cyberdream")
-        end
-    }
 }

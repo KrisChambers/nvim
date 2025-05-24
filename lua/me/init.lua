@@ -1,6 +1,7 @@
 require("me.set")
 require("me.remaps")
 require("me.lazy_init")
+require("me.lsp_init")
 -- require("me.experiments")
 
 local augroup = vim.api.nvim_create_augroup
@@ -9,6 +10,7 @@ local me = augroup('me', {})
 local create_autocmd = vim.api.nvim_create_autocmd
 local yank_group = augroup('HighlightYank', {})
 local create_cmd = vim.api.nvim_create_user_command
+
 
 function R(name)
     require("plenary.reload").reload_module(name)
@@ -19,7 +21,7 @@ create_autocmd('TextYankPost', {
     group = yank_group,
     pattern = '*',
     callback = function()
-        vim.highlight.on_yank({
+        vim.hl.on_yank({
             higroup = 'IncSearch',
             timeout = 100,
         })

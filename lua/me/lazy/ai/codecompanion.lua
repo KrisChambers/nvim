@@ -20,7 +20,7 @@ return {
 		opts = {
 	        strategies = { -- Which LLM to use for specific parts
 				chat = {
-					adapter = "anthropic",
+					adapter = "gemini",
                     keymaps = {
                         send = { n = "<C-R>", i = "<C-s>" },
                         close = { n = "<C-q>", i = "<C-q>" }
@@ -28,8 +28,21 @@ return {
 				},
                 inline = { adapter = "anthropic", },
                 agent = { adapter = "anthropic" },
+                cmd = { adapter = "anthropic"}
 			},
             adapters = {
+                gemini = function()
+                    return require("codecompanion.adapters").extend("gemini", {
+                        schema = {
+                            model = {
+                                defualt = "gemini-2.5"
+
+                            }
+
+                        }
+
+                    })
+                end,
                 anthropic = function ()
                     return require("codecompanion.adapters").extend("anthropic", {
                         schema = {
@@ -59,7 +72,8 @@ return {
         config = function (_, opts)
             local cc = require("codecompanion")
             cc.setup(opts)
-            vim.keymap.set("n", "<leader>ch", cc.toggle, {})
+            vim.keymap.set({"n", "v"}, "<leader>ch", cc.toggle, {})
+            vim.keymap.set({"n", "v"}, "<leader>ci", [[:CodeCompanion ]], {})
         end
 	},
 }

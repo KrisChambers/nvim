@@ -12,7 +12,15 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-    spec = "me.lazy",
+    spec ={
+        { import = "me.lazy" },
+        { import = "me.lazy.ai" },
+        { import = "me.lazy.lsp" },
+        { import = "me.lazy.ui" },
+        { import = "me.lazy.langs" },
+        { import = "me.lazy.core" },
+        { import = "me.lazy.editor" },
+    },
     change_detection = { notify = false },
     dev = {
         path = "/home/kris/personal/KrisChambers",
