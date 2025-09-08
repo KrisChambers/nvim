@@ -2,6 +2,7 @@ require("me.set")
 require("me.remaps")
 require("me.lazy_init")
 require("me.lsp_init")
+local workspace = require("me.workspace")
 -- require("me.experiments")
 
 local augroup = vim.api.nvim_create_augroup
@@ -56,17 +57,17 @@ create_autocmd({ "BufWritePre" }, {
 --[[
 -- PYTHON specific
 --]]
-create_autocmd('BufWritePost', {
-    desc = "Format python files with ruff",
-    pattern = { "*.py" },
-    group = me,
-
-    callback = function()
-        local filename = vim.api.nvim_buf_get_name(0)
-        vim.cmd(":silent !ruff check --select I --fix " .. filename)
-        vim.cmd(":silent !ruff format " .. filename)
-    end
-})
+--create_autocmd('BufWritePost', {
+--    desc = "Format python files with ruff",
+--    pattern = { "*.py" },
+--    group = me,
+--
+--    callback = function(args)
+--        local filename = vim.api.nvim_buf_get_name(0)
+--        vim.cmd(":silent !ruff check --select I --fix " .. filename)
+--        vim.cmd(":silent !ruff format " .. filename)
+--    end
+--})
 
 --[[
 -- Haskell Specific stuff
@@ -74,25 +75,41 @@ create_autocmd('BufWritePost', {
 create_autocmd('LspAttach', {
     group = me,
     pattern = { "*.hs" },
-    callback = function (e)
-            --local ht = require('haskell-tools')
-            --local opts = { noremap = true, silent = true, buffer = e.buf, }
-            ---- haskell-language-server relies heavily on codeLenses,
-            ---- so auto-refresh (see advanced configuration) is enabled by default
-            --vim.keymap.set('n', '<space>cl', vim.lsp.codelens.run, opts)
-            ---- Hoogle search for the type signature of the definition under the cursor
-            --vim.keymap.set('n', '<space>hs', ht.hoogle.hoogle_signature, opts)
-            ---- Evaluate all code snippets
-            --vim.keymap.set('n', '<space>ea', ht.lsp.buf_eval_all, opts)
-            ---- Toggle a GHCi repl for the current package
-            --vim.keymap.set('n', '<leader>rr', ht.repl.toggle, opts)
-            ---- Toggle a GHCi repl for the current buffer
-            --vim.keymap.set('n', '<leader>rf', function()
-            --  ht.repl.toggle(vim.api.nvim_buf_get_name(0))
-            --end, opts)
-            --vim.keymap.set('n', '<leader>rq', ht.repl.quit, opts)
+    callback = function(e)
+        --local ht = require('haskell-tools')
+        local opts = { noremap = true, silent = true, buffer = e.buf, }
+        ---- haskell-language-server relies heavily on codeLenses,
+        ---- so auto-refresh (see advanced configuration) is enabled by default
+        vim.keymap.set('n', '<space>cl', vim.lsp.codelens.run, opts)
+        ---- Hoogle search for the type signature of the definition under the cursor
+        --vim.keymap.set('n', '<space>hs', ht.hoogle.hoogle_signature, opts)
+        ---- Evaluate all code snippets
+        --vim.keymap.set('n', '<space>ea', ht.lsp.buf_eval_all, opts)
+        ---- Toggle a GHCi repl for the current package
+        --vim.keymap.set('n', '<leader>rr', ht.repl.toggle, opts)
+        ---- Toggle a GHCi repl for the current buffer
+        --vim.keymap.set('n', '<leader>rf', function()
+        --  ht.repl.toggle(vim.api.nvim_buf_get_name(0))
+        --end, opts)
+        --vim.keymap.set('n', '<leader>rq', ht.repl.quit, opts)
     end
 
+})
+
+--[[
+-- Inlay hints
+-- Currently for rust and pyth
+--]]
+create_autocmd('LspAttach', {
+    group = me,
+    pattern = { "*.py", "*.rs" },
+    callback = function(e)
+        vim.lsp.inlay_hint.enable(true, { nil })
+
+        vim.tbl_map(function(client)
+            workspace.trigger_workspace_diagnostics(client, 0)
+        end, vim.lsp.get_clients())
+    end
 })
 
 --[[
@@ -109,7 +126,7 @@ create_autocmd('LspAttach', {
         vim.keymap.set("n", "<leader>vca", function() vim.lsp.buf.code_action() end, opts)
         vim.keymap.set("n", "<leader>vrr", function() vim.lsp.buf.references() end, opts)
         vim.keymap.set("n", "<leader>vrn", function() vim.lsp.buf.rename() end, opts)
-        vim.keymap.set({"i", "n"}, "<C-h>", function() vim.lsp.buf.signature_help() end, opts)
+        vim.keymap.set({ "i", "n" }, "<C-h>", function() vim.lsp.buf.signature_help() end, opts)
         vim.keymap.set("n", "[d", function() vim.diagnostic.goto_next() end, opts)
         vim.keymap.set("n", "]d", function() vim.diagnostic.goto_prev() end, opts)
     end
@@ -162,12 +179,12 @@ function Create_layout()
     vim.cmd(main_max_width .. 'vsplit')
     local c = vim.api.nvim_get_current_win()
 
-    vim.api.nvim_set_option_value("winfixheight", true, { scope="local", win = a })
-    vim.api.nvim_set_option_value("winfixwidth", true, { scope="local", win = a })
-    vim.api.nvim_set_option_value("winfixheight", true, { scope="local", win = b })
-    vim.api.nvim_set_option_value("winfixwidth", true, { scope="local", win = b })
-    vim.api.nvim_set_option_value("winfixheight", true, { scope="local", win = c })
-    vim.api.nvim_set_option_value("winfixwidth", true, { scope="local", win = c })
+    vim.api.nvim_set_option_value("winfixheight", true, { scope = "local", win = a })
+    vim.api.nvim_set_option_value("winfixwidth", true, { scope = "local", win = a })
+    vim.api.nvim_set_option_value("winfixheight", true, { scope = "local", win = b })
+    vim.api.nvim_set_option_value("winfixwidth", true, { scope = "local", win = b })
+    vim.api.nvim_set_option_value("winfixheight", true, { scope = "local", win = c })
+    vim.api.nvim_set_option_value("winfixwidth", true, { scope = "local", win = c })
 
     local original_buf = vim.api.nvim_win_get_buf(a)
     local new_buffer = vim.api.nvim_create_buf(true, false)
@@ -194,5 +211,6 @@ function Create_layout()
     --vim.api.nvim_win_set_height(first_win, max_height)
     --vim.api.nvim_set_option_value("winfixheight", true, { scope="local", win = first_win })
 end
-
 -- Create_layout()
+
+

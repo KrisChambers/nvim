@@ -1,0 +1,25 @@
+{
+    "Create a NewType": {
+        "prefix": "newtype",
+        "body": [
+            "@dataclass",
+            "class ${1:newtype_name}:",
+            "    _value: ${2:newtype_wrapper_type}",
+            "    ",
+            "    @property",
+            "    def value(self) -> ${2}:",
+            "        return self.value"
+        ]
+    },
+    "Dataclass with matching TypedDict": {
+        "prefix": "dataclass_with_dict",
+        "body": [
+            "@dataclass",
+            "class ${1: classname}:",
+            "  class ${1}Dict(TypedDict):",
+            "    ${2:*}",
+            "  ${2:*}"
+        ],
+        "description": "Dataclass with matching TypedDict"
+    }
+}

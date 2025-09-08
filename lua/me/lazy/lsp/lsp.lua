@@ -1,152 +1,197 @@
 return {
     "neovim/nvim-lspconfig",
-    dependencies = {
-        "williamboman/mason.nvim",
+    dependencies = { "williamboman/mason.nvim",
         "williamboman/mason-lspconfig.nvim",
-        --"hrsh7th/cmp-nvim-lsp",
-        --"hrsh7th/cmp-buffer",
-        --"hrsh7th/cmp-path",
-        --"hrsh7th/cmp-cmdline",
-        --"hrsh7th/nvim-cmp",
-        --"L3MON4D3/LuaSnip",
+        --"hrsh7th/cmp-nvim-lsp", "hrsh7th/cmp-buffer", "hrsh7th/cmp-path",
+        --"hrsh7th/cmp-cmdline", "hrsh7th/nvim-cmp", "L3MON4D3/LuaSnip",
         --"saadparwaiz1/cmp_luasnip",
-        "j-hui/fidget.nvim",
-        "saghen/blink.cmp",
-    },
+        "j-hui/fidget.nvim", "saghen/blink.cmp", },
 
     config = function()
-        local function get_nvim_cmp_capabilities()
-            local cmp_lsp = require("cmp_nvim_lsp")
+        local function client_capabilities()
+            local caps = vim.lsp.protocol.make_client_capabilities()
 
-            return vim.tbl_deep_extend(
-                "force",
-                {},
-                vim.lsp.protocol.make_client_capabilities(),
-                cmp_lsp.default_capabilities())
+            -- This is turned off by default
+            caps.workspace.didChangeWatchedFiles.dynamicRegistration = true
+
+            return caps
         end
 
+        --- @return lsp.ClientCapabilities
         local function get_blink_capabilities()
-            local blk = require("blink.cmp")
+            local blk_caps = require("blink.cmp").get_lsp_capabilities()
+            local client_caps = client_capabilities()
 
-            return vim.tbl_deep_extend(
-                "force",
-                {},
-                vim.lsp.protocol.make_client_capabilities(),
-                blk.get_lsp_capabilities())
+            return vim.tbl_deep_extend("force", {}, blk_caps, client_caps)
         end
 
-        -- Old setup for nvim-cmp
-        local function setup_cmp()
-            local cmp = require('cmp')
-            local cmp_select = { behavior = cmp.SelectBehavior.Select }
-            cmp.setup({
-                snippet = {
-                    expand = function(args)
-                        require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
-                    end,
-                },
-                mapping = cmp.mapping.preset.insert({
-                    ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
-                    ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
-                    ['<C-y>'] = cmp.mapping.confirm({ select = true }),
-                    ["<C-Space>"] = cmp.mapping.complete(),
-                }),
-                sources = cmp.config.sources({
-                    { name = 'nvim_lsp' },
-                    { name = 'luasnip' }, -- For luasnip users.
-                }, {
-                    { name = 'buffer' },
-                })
-            })
 
-            vim.diagnostic.config({
-                -- update_in_insert = true,
-                float = {
-                    focusable = false,
-                    style = "minimal",
-                    border = "rounded",
-                    source = true,
-                    header = "",
-                    prefix = "",
-                },
-            })
+        local lspconfig = require("lspconfig")
 
-        end
 
-        local function get_lspconfig()
-            return require("lspconfig")
-        end
-
+        -- BUG (kc): Haskell doesn't like these. Some issues with the importLens when inlay hints are enabled
+        --         : TO reproduce this. turn on inlay hints, Create a new file and start typing.
+        -- vim.lsp.inlay_hint.enable(true, {nil})
 
         local capabilities = get_blink_capabilities()
-        --local capabilities = get_nvim_cmp_capabilities()
 
         require("fidget").setup({})
-        require("mason").setup()
-        require("mason-lspconfig").setup({
-            automatic_installation = false,
-            automatic_enable = true,
+        require("mason").setup({})
+
+        local mason_lspconfig = require("mason-lspconfig")
+        mason_lspconfig.setup({
+            automatic_enable = false, -- We turn this off because lspconfig will enable the lsp when the setup runs
             ensure_installed = {
                 "lua_ls",
                 "rust_analyzer",
-                "pyright",
-                "terraformls",
             },
-            handlers = {
-                function(server_name) -- default handler (optional)
-                    get_lspconfig()[server_name].setup {
-                        capabilities = capabilities
-                    }
-                end,
+        })
 
-                ["hls"] = function()
-                    get_lspconfig().hls.setup {
-                        capabilities = capabilities,
-                        filetypes = { 'haskell', 'lhaskell', 'cabal' }
-                    }
-                end,
+        -- Mason-lspconfig not longer handles the setups so here is an alternative setup that utilizes lspconfig
+        -- Note (kc): When lspconfig.*.setup is called it looks like it does the vim.lsp.enable
+        --            So doing this means we want the automatic_enable turned off otherwise we have seen duplicate entries
+        --            in the type checking
 
-                ["rust_analyzer"] = function()
-                    get_lspconfig().rust_analyzer.setup({
-                        capabilities = capabilities
-                    })
-                    -- We want inlay hints.
-                    vim.lsp.inlay_hint.enable(true, {nil})
+        local function default_setup(server_name)
+            lspconfig[server_name].setup {
+                capabilities = capabilities
+            }
+        end
 
-                    --for _, method in ipairs({ 'textDocument/diagnostic', 'workspace/diagnostic' }) do
-                    --    local default_diagnostic_handler = vim.lsp.handlers[method]
+        local setup_handlers = {
 
-                    --    -- NOTE (kc): There is a weird error where the lsp is canceling some request which causes some issues.
-                    --    -- This wraps the handler and doesn't return an error for the diagnostics
-                    --    vim.lsp.handlers[method] = function(err, result, context, config)
-                    --        if err ~= nil and err.code == -32802 then
-                    --            return
-                    --        end
-                    --        return default_diagnostic_handler(err, result, context, config)
-                    --    end
-                    --end
-                end,
+            --["basedpyright"] = function()
+            --    require('lspconfig').basedpyright.setup {
+            --        on_attach = function()
+            --            print("BASEDPYRIGHT ATTACHED")
+            --        end,
+            --        settings = {
+            --            basedpyright = {
+            --                analysis = {
+            --                    autoSearchPaths = true,
+            --                    useLibraryCodeForTypes = true,
+            --                    typeCheckingMode = "standard",
+            --                    diagnosticMode = "workspace",
+            --                    disableOrganizeImports = true
+            --                }
+            --            },
+            --            python = {
+            --                analysis = {
+            --                    ignore = { '*' }
+            --                }
+            --            }
+            --        }
+            --    }
+            --end,
 
-                ["lua_ls"] = function()
-                    get_lspconfig().lua_ls.setup {
-                        capabilities = capabilities,
-                        settings = {
-                            Lua = {
-                                runtime = { version = "Lua 5.1" },
-                                diagnostics = {
-                                    globals = {  "vim" },
-                                },
+            ["pyright"] = function()
+                lspconfig.pyright.setup {
+                    on_attach = function()
+                        print("PYRIGHT ATTACHED")
+                    end,
+                    settings = {
+                        python = {
+                            analysis = {
+                                autoSearchPaths = true,
+                                useLibraryCodeForTypes = true,
+                                typeCheckingMode = "standard",
+                                diagnosticMode = "workspace",
                             }
                         }
                     }
-                end,
+                }
+            end,
+            ["yamlls"] = function ()
+                require("lspconfig").yamlls.setup {
+                  settings = {
+                    yaml = {
+                      schemas = {
+                        -- Treats every yaml file as a kubernetes file -- not sure I want that.
+                        [require('kubernetes').yamlls_schema()] = "*.yaml",
 
-                ["terraformls"] = function()
-                    get_lspconfig().terraformls.setup({})
+                        -- ["http://json.schemastore.org/github-workflow"] = ".github/workflows/*",
+                        -- ["http://json.schemastore.org/github-action"] = ".github/action.{yml,yaml}",
+                        -- ["http://json.schemastore.org/ansible-stable-2.9"] = "roles/tasks/**/*.{yml,yaml}",
+                        -- ["http://json.schemastore.org/prettierrc"] = ".prettierrc.{yml,yaml}",
+                        ["http://json.schemastore.org/kustomization"] = "kustomization.{yml,yaml}",
+                        -- ["http://json.schemastore.org/chart"] = "Chart.{yml,yaml}",
+                        -- ["http://json.schemastore.org/circleciconfig"] = ".circleci/**/*.{yml,yaml}",
+                      },
+                    },
+                  },
+                }
+            end
+        }
+
+        setmetatable(setup_handlers, {
+            __index = function(_, key)
+                return function()
+                    default_setup(key)
                 end
-            }
+            end
+
         })
 
-        --setup_cmp()
+        local servers = mason_lspconfig.get_installed_servers()
+
+        for _, value in ipairs(servers) do
+            setup_handlers[value]()
+        end
+
+
+        --local handlers = {
+        --     function(server_name) -- default handler (optional)
+        --         lspconfig()[server_name].setup {
+        --             capabilities = capabilities
+        --         }
+        --     end,
+
+        --     ["rust_analyzer"] = function()
+        --         lspconfig().rust_analyzer.setup({
+        --             capabilities = capabilities,
+        --         })
+        --     end,
+
+        --     ["lua_ls"] = function()
+        --         lspconfig().lua_ls.setup {
+        --             capabilities = capabilities,
+        --             settings = {
+        --                 Lua = {
+        --                     runtime = { version = "Lua 5.1" },
+        --                     diagnostics = {
+        --                         globals = { "vim" },
+        --                     },
+        --                 }
+        --             }
+        --         }
+        --     end,
+
+        --     ["basedpyright"] = function()
+        --         print('basedpyright setup')
+        --         lspconfig().basedpyright.setup {
+        --             capabilities = capabilities,
+        --             settings = {
+        --                 python = {
+        --                     analysis = {
+        --                         typeCheckingMode = "off",
+        --                         diagnosticMode = "workspace"
+        --                     }
+        --                 }
+        --             }
+        --         }
+        --     end,
+
+        --     --           ["pyright"] = function()
+        --     --               get_lspconfig().pyright.setup {
+        --     --                   capabilities = capabilities,
+        --     --               }
+        --     --           end,
+
+        --     ["terraformls"] = function()
+        --         lspconfig().terraformls.setup {
+        --             capabilities = capabilities,
+        --         }
+        --     end
+        -- }
     end
 }

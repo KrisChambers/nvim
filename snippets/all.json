@@ -1,0 +1,14 @@
+{
+  "Say hello to the world": {
+    "prefix": ["hw", "hello"],
+    "body": "Hello, ${1:world}!$0"
+    },
+  "foo": {
+    "prefix": "foo",
+    "body": [
+      "local ${1:foo} = ${2:bar}",
+      "return ${3:baz}"
+    ]
+  }
+}
+

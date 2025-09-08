@@ -1,0 +1,37 @@
+return {}
+--return {
+--    {
+--        'akinsho/toggleterm.nvim',
+--        version = "*",
+--        opts = {
+--            --[[ things you want to change go here]]
+--        },
+--        config = function(_, opts)
+--            local tt = require("toggleterm")
+--            tt.setup(opts)
+--
+--            --- Toggles the terminal and optionally sets the focus
+--            ---@param set_focus boolean flag to indicate if the focus should be set.
+--            local function toggle_terminal(set_focus)
+--                local cur_window = vim.api.nvim_get_current_win()
+--
+--                tt.toggle(nil, 150, nil, 'vertical', nil)
+--
+--                -- Exit insert mode
+--               -- local esc = vim.api.nvim_replace_termcodes("<Esc>", true, false, true)
+--               -- vim.api.nvim_feedkeys(esc, "n", false)
+--
+--                if not set_focus then
+--                    vim.api.nvim_command("stopinsert")
+--                    -- Go back to the current window
+--                    vim.api.nvim_set_current_win(cur_window)
+--                end
+--            end
+--
+--
+--            vim.keymap.set("n", "<leader>tt", function()
+--                toggle_terminal(true)
+--            end)
+--        end
+--    }
+--}
