@@ -30,6 +30,12 @@ vim.keymap.set("n", "<leader>ft", function ()
 end,
 { desc = "Format current buffer" })
 
+vim.keymap.set({"n", "x"}, "<leader>rr", function ()
+    local tele = require("telescope")
+
+    tele.extensions.refactoring.refactors()
+end)
+
 --vim.keymap.set("n", "<C-f>", "<cmd>silent !tmux neww tmux-sessionizer<CR>")
 --vim.keymap.set("n", "<C-k>", "<cmd>cnext<CR>zz")
 --vim.keymap.set("n", "<C-j>", "<cmd>cprev<CR>zz")
