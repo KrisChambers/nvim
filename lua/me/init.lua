@@ -1,7 +1,6 @@
 require("me.set")
 require("me.remaps")
 require("me.lazy_init")
-require("me.lsp_init")
 local workspace = require("me.workspace")
 -- require("me.experiments")
 
