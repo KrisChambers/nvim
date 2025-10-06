@@ -1,4 +1,0 @@
--- Trying out configuring lsp without all the dependencies
---vim.lsp.config("*", {})
---vim.lsp.enable("hls")
---vim.lsp.enable("lua_ls")

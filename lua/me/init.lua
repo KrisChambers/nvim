@@ -53,11 +53,10 @@ create_autocmd({ "BufWritePre" }, {
 --    end
 --})
 
-
 --[[
 -- PYTHON specific
 --]]
---create_autocmd('BufWritePost', {
+--create_autocmd('BufEnter', {
 --    desc = "Format python files with ruff",
 --    pattern = { "*.py" },
 --    group = me,
@@ -98,11 +97,11 @@ create_autocmd('LspAttach', {
 
 --[[
 -- Inlay hints
--- Currently for rust and pyth
+-- Currently for rust
 --]]
 create_autocmd('LspAttach', {
     group = me,
-    pattern = { "*.py", "*.rs" },
+    pattern = { "*.rs" },
     callback = function(e)
         vim.lsp.inlay_hint.enable(true, { nil })
 

@@ -86,9 +86,6 @@ return {
 
             ["pyright"] = function()
                 lspconfig.pyright.setup {
-                    on_attach = function()
-                        print("PYRIGHT ATTACHED")
-                    end,
                     settings = {
                         python = {
                             analysis = {
@@ -120,6 +117,20 @@ return {
                     },
                   },
                 }
+            end,
+            ["rust_analyzer"] = function ()
+                require("lspconfig").rust_analyzer.setup({
+                    settings = {
+                        ['rust-analyzer'] = {
+                            cargo = {
+                                allFeatures = true,
+                            },
+                            checkOnSave = {
+                                command = "clippy",  -- or "check" if you prefer
+                            },
+                        },
+                    },
+                })
             end
         }
 
