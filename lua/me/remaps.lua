@@ -10,6 +10,8 @@ vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Move up a page and keep the cu
 vim.keymap.set("n", "n", "nzzzv", { desc = "Find forward (same as `n`), keeping cursor centered" })
 vim.keymap.set("n", "N", "Nzzzv", { desc = "Find backward (same as 'N'), keeping cursor centered" })
 
+vim.keymap.set("n", "<leader>w", ":NvimTreeToggle<CR>", { desc = "Toggle the Nvim Tree window" })
+
 vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]], { desc = "Yank to the system clipboard" })
 vim.keymap.set("n", "<leader>Y", [["+Y]], { desc = "Can't remember what this does" })
 

@@ -28,6 +28,7 @@ create_autocmd('TextYankPost', {
     end,
 })
 
+
 -- Before saving we get rid of any lines with empty lines
 create_autocmd({ "BufWritePre" }, {
     group = me,
@@ -66,6 +67,14 @@ create_autocmd({ "BufWritePre" }, {
 --        vim.cmd(":silent !ruff format " .. filename)
 --    end
 --})
+
+create_autocmd('BufRead', {
+    group = me,
+    pattern = { "*.csv" },
+    callback = function (e)
+        vim.cmd('CsvViewToggle display_mode=border')
+    end
+})
 
 --[[
 -- Haskell Specific stuff
