@@ -1,20 +1,45 @@
 return {
     {
         "rcarriga/nvim-dap-ui",
-        dependencies = { "nvim-neotest/nvim-nio",  "mfussenegger/nvim-dap", "theHamsta/nvim-dap-virtual-text" },
-        config = function()
-            require("dapui").setup()
-        end
-    },
-    {
-        "mfussenegger/nvim-dap",
+        dependencies = { "nvim-neotest/nvim-nio",  "mfussenegger/nvim-dap", "theHamsta/nvim-dap-virtual-text", "mfussenegger/nvim-dap-python" },
         config = function()
             local dap, dapui, dap_python = require("dap"), require("dapui"), require("dap-python")
-            require("nvim-dap-virtual-text").setup({
-                commented = true, -- Shows virtual text alongside the comment
-
+            -- Enable the virtual text commented out
+            require("nvim-dap-virtual-text").setup({ commented = true, })
+            dapui.setup({
+                layouts = {
+                    {
+                        position=  "top",
+                        size = 15,
+                        elements = {
+                            { id = "watches", size = 1 },
+                        }
+                    },
+                    {
+                        position = "left",
+                        size = 40,
+                        elements = {
+                            { id = "scopes", size = 0.25 },
+                            { id = "breakpoints", size = 0.25 },
+                            { id = "stacks", size = 0.25 },
+                        }
+                    },
+                    {
+                        position = "bottom",
+                        size = 10,
+                        elements = {
+                            { id = "repl", size = 0.5 },
+                            { id = "console", size = 0.5 }
+                        }
+                    }
+                }
             })
 
+            -- There is a "SetBreakPoint" and "SetExceptionBreakPoint".
+            -- We want two types of flows:
+            --  1. None -> BP -> EBP -> None : next_breakpoint
+            --  2. None -> BP -> None : toggle_breakpoint
+            dap_python.setup("uv")
             local set_cmd = vim.keymap.set
 
             local function start_debugger()
@@ -27,7 +52,6 @@ return {
 
                 dapui.open()
                 dap.continue()
-
             end
 
             local function stop_debugging()
@@ -41,11 +65,12 @@ return {
                 if ok then
                     nvim_tree_api.tree.open()
                 end
+                -- Check: If we are in a dapui element when we run this then don't try and switch.
                 vim.api.nvim_set_current_win(current_win)
             end
 
             vim.fn.sign_define("DapBreakpoint", {
-                text = "@>",
+                text = "&>",
                 texthl = "DiagnosticSignError",
                 linehl = "",
                 numhl = "DiagnosticSignError"
@@ -64,7 +89,6 @@ return {
                 texthl = "DiagnosticSignWarn",
                 linehl = "Visual",
                 numhl = "DiagnosticSignWarn"
-
             })
 
             local function dap_keymap(action, fallback)
@@ -86,6 +110,9 @@ return {
             set_cmd("n", "<Left>", dap_keymap(dap.step_out, function () vim.cmd("normal! h") end), { desc = "Step Out" })
             set_cmd("n", "<Up>", dap_keymap(dap.restart_frame, function() vim.cmd("normal! k") end), { desc = "Restart Frame" })
             set_cmd("n", "<leader>dc", stop_debugging, { desc = "Stop Debugging" })
+            set_cmd("n", "<leader>dm", dap_python.test_method, { desc = "Debug Test Method"})
+            set_cmd("n", "<leader>dm", dap_python.test_class, { desc = "Debug Test Class"})
+
 
             dap.adapters.lldb = {
                 type = "executable",
@@ -107,26 +134,10 @@ return {
                 end,
                 console = "integratedTerminal",
                 cwd = "${workspaceFolder}"
-
             })
-
-
-            --dap.configurations.odin = {{
-            --    name = "Launch LLDB",
-            --    type = "lldb",
-            --    request = "launch",
-            --    program = function ()
-            --        return vim.fn.getcwd() .. "debug"
-            --    end,
-            --    cwd = "${workspaceFolder}",
-            --    stopOnEntry = false,
-            --}}
         end
     },
     {
-        "mfussenegger/nvim-dap-python",
-        config = function()
-            require('dap-python').setup("uv")
-        end
+        "mfussenegger/nvim-dap",
     }
 }
