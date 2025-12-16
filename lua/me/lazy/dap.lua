@@ -1,7 +1,7 @@
 return {
     {
         "rcarriga/nvim-dap-ui",
-        dependencies = { "nvim-neotest/nvim-nio",  "mfussenegger/nvim-dap", "theHamsta/nvim-dap-virtual-text", "mfussenegger/nvim-dap-python" },
+        dependencies = { "nvim-neotest/nvim-nio",  "mfussenegger/nvim-dap", "theHamsta/nvim-dap-virtual-text", "mfussenegger/nvim-dap-python", "mfussenegger/nvim-dap" },
         config = function()
             local dap, dapui, dap_python = require("dap"), require("dapui"), require("dap-python")
             -- Enable the virtual text commented out
@@ -136,8 +136,5 @@ return {
                 cwd = "${workspaceFolder}"
             })
         end
-    },
-    {
-        "mfussenegger/nvim-dap",
     }
 }
