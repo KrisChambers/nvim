@@ -49,10 +49,7 @@ return {
                 avante = {
                     module = 'blink-cmp-avante',
                     name = 'Avante',
-                    opts = {
-
-                    }
-
+                    opts = { }
                 }
 
             }

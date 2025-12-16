@@ -26,7 +26,8 @@ return {
         end
 
 
-        local lspconfig = require("lspconfig")
+        -- local lspconfig = require("lspconfig")
+
 
 
         -- BUG (kc): Haskell doesn't like these. Some issues with the importLens when inlay hints are enabled
@@ -38,54 +39,27 @@ return {
         require("fidget").setup({})
         require("mason").setup({})
 
-        local mason_lspconfig = require("mason-lspconfig")
-        mason_lspconfig.setup({
-            automatic_enable = false, -- We turn this off because lspconfig will enable the lsp when the setup runs
-            ensure_installed = {
-                "lua_ls",
-                "rust_analyzer",
-            },
-        })
+        -- local mason_lspconfig = require("mason-lspconfig")
+        -- mason_lspconfig.setup({
+        --     automatic_enable = false, -- We turn this off because lspconfig will enable the lsp when the setup runs
+        --     ensure_installed = {
+        --         "lua_ls",
+        --         "rust_analyzer",
+        --     },
+        -- })
 
         -- Mason-lspconfig not longer handles the setups so here is an alternative setup that utilizes lspconfig
         -- Note (kc): When lspconfig.*.setup is called it looks like it does the vim.lsp.enable
         --            So doing this means we want the automatic_enable turned off otherwise we have seen duplicate entries
         --            in the type checking
 
-        local function default_setup(server_name)
-            lspconfig[server_name].setup {
-                capabilities = capabilities
-            }
-        end
 
-        local setup_handlers = {
 
-            --["basedpyright"] = function()
-            --    require('lspconfig').basedpyright.setup {
-            --        on_attach = function()
-            --            print("BASEDPYRIGHT ATTACHED")
-            --        end,
-            --        settings = {
-            --            basedpyright = {
-            --                analysis = {
-            --                    autoSearchPaths = true,
-            --                    useLibraryCodeForTypes = true,
-            --                    typeCheckingMode = "standard",
-            --                    diagnosticMode = "workspace",
-            --                    disableOrganizeImports = true
-            --                }
-            --            },
-            --            python = {
-            --                analysis = {
-            --                    ignore = { '*' }
-            --                }
-            --            }
-            --        }
-            --    }
-            --end,
-
-            ["pyright"] = function()
-                lspconfig.pyright.setup {
+        local lsps = {
+            {
+                "pyright",
+                {
+                    capabilities = capabilities,
                     settings = {
                         python = {
                             analysis = {
@@ -96,113 +70,109 @@ return {
                             }
                         }
                     }
-                }
-            end,
-            ["yamlls"] = function ()
-                require("lspconfig").yamlls.setup {
-                  settings = {
-                    yaml = {
-                      schemas = {
-                        -- Treats every yaml file as a kubernetes file -- not sure I want that.
-                        [require('kubernetes').yamlls_schema()] = "*.yaml",
+                },
+                {
+                    "yamlls",
+                    {
+                        capabilities = capabilities,
+                        settings = {
+                            yaml = {
+                                schemas = {
+                                    -- Treats every yaml file as a kubernetes file -- not sure I want that.
+                                    [require('kubernetes').yamlls_schema()] = "*.yaml",
 
-                        -- ["http://json.schemastore.org/github-workflow"] = ".github/workflows/*",
-                        -- ["http://json.schemastore.org/github-action"] = ".github/action.{yml,yaml}",
-                        -- ["http://json.schemastore.org/ansible-stable-2.9"] = "roles/tasks/**/*.{yml,yaml}",
-                        -- ["http://json.schemastore.org/prettierrc"] = ".prettierrc.{yml,yaml}",
-                        ["http://json.schemastore.org/kustomization"] = "kustomization.{yml,yaml}",
-                        -- ["http://json.schemastore.org/chart"] = "Chart.{yml,yaml}",
-                        -- ["http://json.schemastore.org/circleciconfig"] = ".circleci/**/*.{yml,yaml}",
-                      },
-                    },
-                  },
+                                    -- ["http://json.schemastore.org/github-workflow"] = ".github/workflows/*",
+                                    -- ["http://json.schemastore.org/github-action"] = ".github/action.{yml,yaml}",
+                                    -- ["http://json.schemastore.org/ansible-stable-2.9"] = "roles/tasks/**/*.{yml,yaml}",
+                                    -- ["http://json.schemastore.org/prettierrc"] = ".prettierrc.{yml,yaml}",
+                                    ["http://json.schemastore.org/kustomization"] = "kustomization.{yml,yaml}",
+                                    -- ["http://json.schemastore.org/chart"] = "Chart.{yml,yaml}",
+                                    -- ["http://json.schemastore.org/circleciconfig"] = ".circleci/**/*.{yml,yaml}",
+                                },
+                            },
+                        }
+                    }
+                },
+                {
+                    "rust_analyzer",
+                    {
+                        capabilities = capabilities,
+                        settings = {
+                            ['rust-analyzer'] = {
+                                cargo = {
+                                    allFeatures = true,
+                                },
+                                checkOnSave = {
+                                    command = "clippy", -- or "check" if you prefer
+                                },
+                            },
+                        }
+                    }
                 }
-            end,
-            ["rust_analyzer"] = function ()
-                require("lspconfig").rust_analyzer.setup({
-                    settings = {
-                        ['rust-analyzer'] = {
-                            cargo = {
-                                allFeatures = true,
-                            },
-                            checkOnSave = {
-                                command = "clippy",  -- or "check" if you prefer
-                            },
-                        },
-                    },
-                })
-            end
+            }
         }
 
-        setmetatable(setup_handlers, {
-            __index = function(_, key)
-                return function()
-                    default_setup(key)
-                end
-            end
+        -- vim.lsp.config("pyright", {
+        --     capabilities = capabilities,
+        --     settings = {
+        --         python = {
+        --             analysis = {
+        --                 autoSearchPaths = true,
+        --                 useLibraryCodeForTypes = true,
+        --                 typeCheckingMode = "standard",
+        --                 diagnosticMode = "workspace",
+        --             }
+        --         }
+        --     }
+        -- })
 
+        -- vim.lsp.config("yamlls", {
+        --     capabilities = capabilities,
+        --     settings = {
+        --         yaml = {
+        --             schemas = {
+        --                 -- Treats every yaml file as a kubernetes file -- not sure I want that.
+        --                 [require('kubernetes').yamlls_schema()] = "*.yaml",
+
+        --                 -- ["http://json.schemastore.org/github-workflow"] = ".github/workflows/*",
+        --                 -- ["http://json.schemastore.org/github-action"] = ".github/action.{yml,yaml}",
+        --                 -- ["http://json.schemastore.org/ansible-stable-2.9"] = "roles/tasks/**/*.{yml,yaml}",
+        --                 -- ["http://json.schemastore.org/prettierrc"] = ".prettierrc.{yml,yaml}",
+        --                 ["http://json.schemastore.org/kustomization"] = "kustomization.{yml,yaml}",
+        --                 -- ["http://json.schemastore.org/chart"] = "Chart.{yml,yaml}",
+        --                 -- ["http://json.schemastore.org/circleciconfig"] = ".circleci/**/*.{yml,yaml}",
+        --             },
+        --         },
+        --     },
+        -- })
+
+        -- vim.lsp.config("rust_analyzer", {
+        --     capabilities = capabilities,
+        --     settings = {
+        --         ['rust-analyzer'] = {
+        --             cargo = {
+        --                 allFeatures = true,
+        --             },
+        --             checkOnSave = {
+        --                 command = "clippy", -- or "check" if you prefer
+        --             },
+        --         },
+        --     },
+        -- })
+
+        -- Defaults
+        vim.lsp.config("*", {
+            capabilities = capabilities
         })
 
-        local servers = mason_lspconfig.get_installed_servers()
+        for _, lsp in pairs(lsps) do
+            local name, config = lsp[1], lsp[2]
 
-        for _, value in ipairs(servers) do
-            setup_handlers[value]()
+            vim.lsp.enable(name)
+            if config ~= nil then
+                vim.lsp.config(name, config)
+            end
+
         end
-
-
-        --local handlers = {
-        --     function(server_name) -- default handler (optional)
-        --         lspconfig()[server_name].setup {
-        --             capabilities = capabilities
-        --         }
-        --     end,
-
-        --     ["rust_analyzer"] = function()
-        --         lspconfig().rust_analyzer.setup({
-        --             capabilities = capabilities,
-        --         })
-        --     end,
-
-        --     ["lua_ls"] = function()
-        --         lspconfig().lua_ls.setup {
-        --             capabilities = capabilities,
-        --             settings = {
-        --                 Lua = {
-        --                     runtime = { version = "Lua 5.1" },
-        --                     diagnostics = {
-        --                         globals = { "vim" },
-        --                     },
-        --                 }
-        --             }
-        --         }
-        --     end,
-
-        --     ["basedpyright"] = function()
-        --         print('basedpyright setup')
-        --         lspconfig().basedpyright.setup {
-        --             capabilities = capabilities,
-        --             settings = {
-        --                 python = {
-        --                     analysis = {
-        --                         typeCheckingMode = "off",
-        --                         diagnosticMode = "workspace"
-        --                     }
-        --                 }
-        --             }
-        --         }
-        --     end,
-
-        --     --           ["pyright"] = function()
-        --     --               get_lspconfig().pyright.setup {
-        --     --                   capabilities = capabilities,
-        --     --               }
-        --     --           end,
-
-        --     ["terraformls"] = function()
-        --         lspconfig().terraformls.setup {
-        --             capabilities = capabilities,
-        --         }
-        --     end
-        -- }
     end
 }
