@@ -70,109 +70,77 @@ return {
                             }
                         }
                     }
-                },
-                {
-                    "yamlls",
-                    {
-                        capabilities = capabilities,
-                        settings = {
-                            yaml = {
-                                schemas = {
-                                    -- Treats every yaml file as a kubernetes file -- not sure I want that.
-                                    [require('kubernetes').yamlls_schema()] = "*.yaml",
+                }
+            },
 
-                                    -- ["http://json.schemastore.org/github-workflow"] = ".github/workflows/*",
-                                    -- ["http://json.schemastore.org/github-action"] = ".github/action.{yml,yaml}",
-                                    -- ["http://json.schemastore.org/ansible-stable-2.9"] = "roles/tasks/**/*.{yml,yaml}",
-                                    -- ["http://json.schemastore.org/prettierrc"] = ".prettierrc.{yml,yaml}",
-                                    ["http://json.schemastore.org/kustomization"] = "kustomization.{yml,yaml}",
-                                    -- ["http://json.schemastore.org/chart"] = "Chart.{yml,yaml}",
-                                    -- ["http://json.schemastore.org/circleciconfig"] = ".circleci/**/*.{yml,yaml}",
-                                },
-                            },
-                        }
-                    }
-                },
+            {
+                "ruff",
                 {
-                    "rust_analyzer",
-                    {
-                        capabilities = capabilities,
-                        settings = {
-                            ['rust-analyzer'] = {
-                                cargo = {
-                                    allFeatures = true,
-                                },
-                                checkOnSave = {
-                                    command = "clippy", -- or "check" if you prefer
-                                },
+                    capabilities = capabilities
+                }
+
+            },
+
+            {
+                "yamlls",
+                {
+                    capabilities = capabilities,
+                    settings = {
+                        yaml = {
+                            schemas = {
+                                -- Treats every yaml file as a kubernetes file -- not sure I want that.
+                                [require('kubernetes').yamlls_schema()] = "*.yaml",
+
+                                -- ["http://json.schemastore.org/github-workflow"] = ".github/workflows/*",
+                                -- ["http://json.schemastore.org/github-action"] = ".github/action.{yml,yaml}",
+                                -- ["http://json.schemastore.org/ansible-stable-2.9"] = "roles/tasks/**/*.{yml,yaml}",
+                                -- ["http://json.schemastore.org/prettierrc"] = ".prettierrc.{yml,yaml}",
+                                ["http://json.schemastore.org/kustomization"] = "kustomization.{yml,yaml}",
+                                -- ["http://json.schemastore.org/chart"] = "Chart.{yml,yaml}",
+                                -- ["http://json.schemastore.org/circleciconfig"] = ".circleci/**/*.{yml,yaml}",
                             },
-                        }
+                        },
                     }
                 }
-            }
+            },
+
+            {
+                "rust_analyzer",
+                {
+                    capabilities = capabilities,
+                    settings = {
+                        ['rust-analyzer'] = {
+                            cargo = {
+                                allFeatures = true,
+                            },
+                            checkOnSave = {
+                                command = "clippy", -- or "check" if you prefer
+                            },
+                        },
+                    }
+                }
+            },
         }
-
-        -- vim.lsp.config("pyright", {
-        --     capabilities = capabilities,
-        --     settings = {
-        --         python = {
-        --             analysis = {
-        --                 autoSearchPaths = true,
-        --                 useLibraryCodeForTypes = true,
-        --                 typeCheckingMode = "standard",
-        --                 diagnosticMode = "workspace",
-        --             }
-        --         }
-        --     }
-        -- })
-
-        -- vim.lsp.config("yamlls", {
-        --     capabilities = capabilities,
-        --     settings = {
-        --         yaml = {
-        --             schemas = {
-        --                 -- Treats every yaml file as a kubernetes file -- not sure I want that.
-        --                 [require('kubernetes').yamlls_schema()] = "*.yaml",
-
-        --                 -- ["http://json.schemastore.org/github-workflow"] = ".github/workflows/*",
-        --                 -- ["http://json.schemastore.org/github-action"] = ".github/action.{yml,yaml}",
-        --                 -- ["http://json.schemastore.org/ansible-stable-2.9"] = "roles/tasks/**/*.{yml,yaml}",
-        --                 -- ["http://json.schemastore.org/prettierrc"] = ".prettierrc.{yml,yaml}",
-        --                 ["http://json.schemastore.org/kustomization"] = "kustomization.{yml,yaml}",
-        --                 -- ["http://json.schemastore.org/chart"] = "Chart.{yml,yaml}",
-        --                 -- ["http://json.schemastore.org/circleciconfig"] = ".circleci/**/*.{yml,yaml}",
-        --             },
-        --         },
-        --     },
-        -- })
-
-        -- vim.lsp.config("rust_analyzer", {
-        --     capabilities = capabilities,
-        --     settings = {
-        --         ['rust-analyzer'] = {
-        --             cargo = {
-        --                 allFeatures = true,
-        --             },
-        --             checkOnSave = {
-        --                 command = "clippy", -- or "check" if you prefer
-        --             },
-        --         },
-        --     },
-        -- })
 
         -- Defaults
         vim.lsp.config("*", {
             capabilities = capabilities
         })
 
+        local registry = require("mason-registry")
         for _, lsp in pairs(lsps) do
             local name, config = lsp[1], lsp[2]
 
-            vim.lsp.enable(name)
-            if config ~= nil then
-                vim.lsp.config(name, config)
-            end
+            registry.refresh(function()
+                local installed = registry.get_installed_package_names()
 
+                for _, name in ipairs(installed) do
+                    vim.lsp.enable(name)
+                    if config ~= nil then
+                        vim.lsp.config(name, config)
+                    end
+                end
+            end)
         end
     end
 }
