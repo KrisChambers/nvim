@@ -113,7 +113,6 @@ return {
             set_cmd("n", "<leader>dm", dap_python.test_method, { desc = "Debug Test Method"})
             set_cmd("n", "<leader>dm", dap_python.test_class, { desc = "Debug Test Class"})
 
-
             dap.adapters.lldb = {
                 type = "executable",
                 command = "/usr/bin/lldb",
@@ -126,6 +125,22 @@ return {
                 name = "Debug CLI (module)",
                 module = function()
                     return vim.fn.input("Module name: ")
+                end,
+                args = function()
+                    local input = vim.fn.input("Arguments: ")
+                    if input == "" then return {} end
+                    return vim.split(input, " ")
+                end,
+                console = "integratedTerminal",
+                cwd = "${workspaceFolder}"
+            })
+
+            table.insert(dap.configurations.python, {
+                type = "python",
+                request = "launch",
+                name = "Debug Script",
+                program = function()
+                    return vim.fn.input("Script path: ", vim.fn.getcw() .. "/", "file")
                 end,
                 args = function()
                     local input = vim.fn.input("Arguments: ")
