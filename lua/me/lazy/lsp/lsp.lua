@@ -1,11 +1,11 @@
 return {
     "neovim/nvim-lspconfig",
-    dependencies = { "williamboman/mason.nvim",
-        "williamboman/mason-lspconfig.nvim",
-        --"hrsh7th/cmp-nvim-lsp", "hrsh7th/cmp-buffer", "hrsh7th/cmp-path",
-        --"hrsh7th/cmp-cmdline", "hrsh7th/nvim-cmp", "L3MON4D3/LuaSnip",
-        --"saadparwaiz1/cmp_luasnip",
-        "j-hui/fidget.nvim", "saghen/blink.cmp", },
+    dependencies = {
+        "williamboman/mason.nvim",
+        -- "williamboman/mason-lspconfig.nvim",
+        "j-hui/fidget.nvim",
+        "saghen/blink.cmp",
+    },
 
     config = function()
         local function client_capabilities()
@@ -56,6 +56,19 @@ return {
 
 
         local lsps = {
+            {
+                "lua_ls",
+                {
+                    capabilities = capabilities,
+                    settings = {
+                        Lua = {
+                            diagnostics = {
+                                globals = { "vim" },
+                            },
+                        },
+                    },
+                }
+            },
             {
                 "pyright",
                 {
@@ -109,17 +122,35 @@ return {
                 {
                     capabilities = capabilities,
                     settings = {
-                        ['rust-analyzer'] = {
-                            cargo = {
-                                allFeatures = true,
-                            },
-                            checkOnSave = {
-                                command = "clippy", -- or "check" if you prefer
-                            },
+                        cargo = {
+                            allFeatures = true,
+                        },
+                        checkOnSave = {
+                            command = "clippy", -- or "check" if you prefer
                         },
                     }
                 }
             },
+
+            {
+                "hls"
+                -- {
+                --     capabilities = capabilities,
+                --     cmd = { 'haskell-language-server-wrapper', '--lsp' },
+                --     filetypes = { 'haskell', 'lhaskell' },
+                --     root_dir = function(bufnr, on_dir)
+                --         local fname = vim.api.nvim_buf_get_name(bufnr)
+                --         on_dir(util.root_pattern('hie.yaml', 'stack.yaml', 'cabal.project', '*.cabal', 'package.yaml')(fname))
+                --     end,
+                --     settings = {
+                --         haskell = {
+                --             formattingProvider = 'formolu',
+                --             cabalFormattingProvider = 'cabal-fmt',
+                --         },
+                --     },
+                -- }
+            }
+
         }
 
         -- Defaults
@@ -131,16 +162,22 @@ return {
         for _, lsp in pairs(lsps) do
             local name, config = lsp[1], lsp[2]
 
-            registry.refresh(function()
-                local installed = registry.get_installed_package_names()
+            vim.lsp.enable(name)
+            if config ~= nil then
+                vim.lsp.config(name, config)
+            end
 
-                for _, name in ipairs(installed) do
-                    vim.lsp.enable(name)
-                    if config ~= nil then
-                        vim.lsp.config(name, config)
-                    end
-                end
-            end)
+            -- registry.refresh(function()
+            --     local installed = registry.get_installed_package_names()
+
+            --     for _, name in ipairs(installed) do
+            --         vim.lsp.enable(name)
+            --         if server_name == name and config ~= nil then
+            --             vim.lsp.config(name, config)
+            --         end
+            --     end
+            -- end)
         end
+
     end
 }
