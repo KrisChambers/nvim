@@ -26,7 +26,7 @@ vim.keymap.set("n", "<leader>q", ":bp <bar> bd #<CR>",
 vim.keymap.set("n", "<leader>ft", function ()
     vim.lsp.buf.format({
         filter = function(client)
-            return (client.name ~= "basedpyright" and client.name ~= "pyright") -- When using python we don't use the parser for formatting
+            return client.name == "ruff"
         end
     })
 end,
