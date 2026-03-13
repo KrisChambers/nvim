@@ -1,3 +1,4 @@
+require("me.abbrev")
 require("me.set")
 require("me.remaps")
 require("me.lazy_init")
