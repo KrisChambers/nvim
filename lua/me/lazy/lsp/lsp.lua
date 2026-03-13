@@ -62,24 +62,36 @@ return {
                     capabilities = capabilities,
                     settings = {
                         Lua = {
-                            diagnostics = {
-                                globals = { "vim" },
+                            runtime = {
+                                version = 'LuaJIT',
+                            },
+                            workspace = {
+                                checkThirdParty = false,
+                                library = {
+                                    vim.env.VIMRUNTIME, -- for neovim
+                                }
                             },
                         },
                     },
                 }
             },
+--             {
+--                 "ty",
+--                 { capabilities = capabilities }
+--             },
             {
                 "pyright",
                 {
                     capabilities = capabilities,
                     settings = {
+                        pyright = {
+                            -- We want to use ruff for import organization
+                            disableOrganizeImports = true
+                        },
                         python = {
                             analysis = {
-                                autoSearchPaths = true,
-                                useLibraryCodeForTypes = true,
-                                typeCheckingMode = "standard",
-                                diagnosticMode = "workspace",
+                                -- Only use ruff for linting
+                                ignore = { "*" },
                             }
                         }
                     }
@@ -133,32 +145,44 @@ return {
             },
 
             {
-                "hls"
-                -- {
-                --     capabilities = capabilities,
+                "hls",
+                {
+                    capabilities = capabilities,
                 --     cmd = { 'haskell-language-server-wrapper', '--lsp' },
-                --     filetypes = { 'haskell', 'lhaskell' },
+                    filetypes = { 'haskell', 'lhaskell' },
                 --     root_dir = function(bufnr, on_dir)
                 --         local fname = vim.api.nvim_buf_get_name(bufnr)
                 --         on_dir(util.root_pattern('hie.yaml', 'stack.yaml', 'cabal.project', '*.cabal', 'package.yaml')(fname))
                 --     end,
-                --     settings = {
-                --         haskell = {
-                --             formattingProvider = 'formolu',
-                --             cabalFormattingProvider = 'cabal-fmt',
-                --         },
-                --     },
-                -- }
+                    settings = {
+                        haskell = {
+                            formattingProvider = 'fourmolu',
+                            cabalFormattingProvider = 'cabal-fmt',
+                        },
+                    },
+                }
             }
-
         }
+
+        vim.api.nvim_create_autocmd("LspAttach", {
+            group = vim.api.nvim_create_augroup('lsp_attach_and_disable_ruff_hover', {}),
+            callback = function(args)
+              local client = vim.lsp.get_client_by_id(args.data.client_id)
+              if client == nil then
+                return
+              end
+              if client.name == 'ruff' then
+                client.server_capabilities.hoverProvider = false
+              end
+            end,
+            desc = 'LSP: Disable hover capability from Ruff',
+        })
 
         -- Defaults
         vim.lsp.config("*", {
             capabilities = capabilities
         })
 
-        local registry = require("mason-registry")
         for _, lsp in pairs(lsps) do
             local name, config = lsp[1], lsp[2]
 
