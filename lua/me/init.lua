@@ -114,9 +114,9 @@ create_autocmd('LspAttach', {
     callback = function(e)
         vim.lsp.inlay_hint.enable(true, { nil })
 
-        vim.tbl_map(function(client)
-            workspace.trigger_workspace_diagnostics(client, 0)
-        end, vim.lsp.get_clients())
+        -- vim.tbl_map(function(client)
+        --     workspace.trigger_workspace_diagnostics(client, 0)
+        -- end, vim.lsp.get_clients())
     end
 })
 

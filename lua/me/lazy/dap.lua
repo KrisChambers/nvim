@@ -122,6 +122,29 @@ return {
             table.insert(dap.configurations.python, {
                 type = "python",
                 request = "launch",
+                name = "Debug Script (Auto Python)",
+                program = "${file}",
+                console = "integratedTerminal",
+                cwd = "${workspaceFolder}"
+            })
+
+
+            -- Force python
+            table.insert(dap.configurations.python, {
+                type = "python",
+                request = "launch",
+                name = "Debug Script (Conda)",
+                program = "${file}",
+                pythonPath = function ()
+                    return vim.env.CONDA_PREFIX .."/bin/python"
+                end,
+                console = "integratedTerminal",
+                cwd = "${workspaceFolder}"
+            })
+
+            table.insert(dap.configurations.python, {
+                type = "python",
+                request = "launch",
                 name = "Debug CLI (module)",
                 module = function()
                     return vim.fn.input("Module name: ")
@@ -150,6 +173,33 @@ return {
                 console = "integratedTerminal",
                 cwd = "${workspaceFolder}"
             })
+
+            table.insert(dap.configurations.python, {
+                type = "python",
+                request = "launch",
+                name = "Debug with Current conda env",
+                program = function()
+                    return vim.fn.input("Script path: ", vim.fn.getcwd() .. "/", "file")
+                end,
+                args = function()
+                    local input = vim.fn.input("Arguments: ")
+                    if input == "" then return {} end
+                    return vim.split(input, " ")
+                end,
+                pythonPath = function ()
+                    local handle = io.popen("which python3 2> /dev/null || which python 2> /dev/null")
+                    if handle then
+                        local result = handle:read("*a"):gsub("%s+$", "")
+                        handle:close()
+                        if result ~= "" then
+                            return result
+                        end
+                    end
+                end,
+                console = "integratedTerminal",
+                cwd = "${workspaceFolder}"
+            })
+
         end
     }
 }

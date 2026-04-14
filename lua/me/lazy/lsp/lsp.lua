@@ -2,7 +2,6 @@ return {
     "neovim/nvim-lspconfig",
     dependencies = {
         "williamboman/mason.nvim",
-        -- "williamboman/mason-lspconfig.nvim",
         "j-hui/fidget.nvim",
         "saghen/blink.cmp",
     },
@@ -25,11 +24,6 @@ return {
             return vim.tbl_deep_extend("force", {}, blk_caps, client_caps)
         end
 
-
-        -- local lspconfig = require("lspconfig")
-
-
-
         -- BUG (kc): Haskell doesn't like these. Some issues with the importLens when inlay hints are enabled
         --         : TO reproduce this. turn on inlay hints, Create a new file and start typing.
         -- vim.lsp.inlay_hint.enable(true, {nil})
@@ -39,23 +33,18 @@ return {
         require("fidget").setup({})
         require("mason").setup({})
 
-        -- local mason_lspconfig = require("mason-lspconfig")
-        -- mason_lspconfig.setup({
-        --     automatic_enable = false, -- We turn this off because lspconfig will enable the lsp when the setup runs
-        --     ensure_installed = {
-        --         "lua_ls",
-        --         "rust_analyzer",
-        --     },
-        -- })
-
-        -- Mason-lspconfig not longer handles the setups so here is an alternative setup that utilizes lspconfig
-        -- Note (kc): When lspconfig.*.setup is called it looks like it does the vim.lsp.enable
-        --            So doing this means we want the automatic_enable turned off otherwise we have seen duplicate entries
-        --            in the type checking
-
-
 
         local lsps = {
+            {
+                "jq",
+                {
+                    capabilities = capabilities,
+                    filetypes = {"json"}
+                }
+            },
+
+            -- LUA
+
             {
                 "lua_ls",
                 {
@@ -75,10 +64,10 @@ return {
                     },
                 }
             },
---             {
---                 "ty",
---                 { capabilities = capabilities }
---             },
+            --             {
+            --                 "ty",
+            --                 { capabilities = capabilities }
+            --             },
             {
                 "pyright",
                 {
@@ -91,7 +80,7 @@ return {
                         python = {
                             analysis = {
                                 -- Only use ruff for linting
-                                ignore = { "*" },
+                                -- ignore = { "*" },
                             }
                         }
                     }
@@ -103,7 +92,6 @@ return {
                 {
                     capabilities = capabilities
                 }
-
             },
 
             {
@@ -115,7 +103,6 @@ return {
                             schemas = {
                                 -- Treats every yaml file as a kubernetes file -- not sure I want that.
                                 [require('kubernetes').yamlls_schema()] = "*.yaml",
-
                                 -- ["http://json.schemastore.org/github-workflow"] = ".github/workflows/*",
                                 -- ["http://json.schemastore.org/github-action"] = ".github/action.{yml,yaml}",
                                 -- ["http://json.schemastore.org/ansible-stable-2.9"] = "roles/tasks/**/*.{yml,yaml}",
@@ -134,6 +121,17 @@ return {
                 {
                     capabilities = capabilities,
                     settings = {
+                        ["rust-analyzer"] = {
+                            files = {
+                                watcher = "notify",
+                            },
+                            workspace = {
+                                excludeFolders = {
+                                    "target/riscv32imc-esp-espidf",
+                                    "target/**/deps"
+                                }
+                            },
+                        },
                         cargo = {
                             allFeatures = true,
                         },
@@ -148,16 +146,22 @@ return {
                 "hls",
                 {
                     capabilities = capabilities,
-                --     cmd = { 'haskell-language-server-wrapper', '--lsp' },
+                    cmd = { 'haskell-language-server-wrapper', '--lsp' },
                     filetypes = { 'haskell', 'lhaskell' },
-                --     root_dir = function(bufnr, on_dir)
-                --         local fname = vim.api.nvim_buf_get_name(bufnr)
-                --         on_dir(util.root_pattern('hie.yaml', 'stack.yaml', 'cabal.project', '*.cabal', 'package.yaml')(fname))
-                --     end,
+                    -- root_dir = function(bufnr, on_dir)
+                    --     local fname = vim.api.nvim_buf_get_name(bufnr)
+                    --     on_dir(util.root_pattern('hie.yaml', 'stack.yaml', 'cabal.project', '*.cabal', 'package.yaml')(fname))
+                    -- end,
                     settings = {
                         haskell = {
                             formattingProvider = 'fourmolu',
                             cabalFormattingProvider = 'cabal-fmt',
+                            -- plugin = {
+                            --     fourmolu = {
+                            --         confit = { external = true },
+                            --         globalOn = true
+                            --     }
+                            -- }
                         },
                     },
                 }
@@ -167,13 +171,13 @@ return {
         vim.api.nvim_create_autocmd("LspAttach", {
             group = vim.api.nvim_create_augroup('lsp_attach_and_disable_ruff_hover', {}),
             callback = function(args)
-              local client = vim.lsp.get_client_by_id(args.data.client_id)
-              if client == nil then
-                return
-              end
-              if client.name == 'ruff' then
-                client.server_capabilities.hoverProvider = false
-              end
+                local client = vim.lsp.get_client_by_id(args.data.client_id)
+                if client == nil then
+                    return
+                end
+                if client.name == 'ruff' then
+                    client.server_capabilities.hoverProvider = false
+                end
             end,
             desc = 'LSP: Disable hover capability from Ruff',
         })
@@ -190,18 +194,6 @@ return {
             if config ~= nil then
                 vim.lsp.config(name, config)
             end
-
-            -- registry.refresh(function()
-            --     local installed = registry.get_installed_package_names()
-
-            --     for _, name in ipairs(installed) do
-            --         vim.lsp.enable(name)
-            --         if server_name == name and config ~= nil then
-            --             vim.lsp.config(name, config)
-            --         end
-            --     end
-            -- end)
         end
-
     end
 }

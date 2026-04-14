@@ -23,16 +23,12 @@ vim.keymap.set("n", "Q", "<nop>", { desc = "Don't do anything when Q is pressed"
 
 vim.keymap.set("n", "<leader>q", ":bp <bar> bd #<CR>",
     { desc = "Move to previous buffer and close current buffer - Need more than one buffer" })
-vim.keymap.set("n", "<leader>ft", function ()
-    vim.lsp.buf.format({
-        filter = function(client)
-            return client.name == "ruff"
-        end
-    })
-end,
-{ desc = "Format current buffer" })
+vim.keymap.set("n", "<leader>ft", function()
+        vim.lsp.buf.format({ async = true })
+    end,
+    { desc = "Format current buffer" })
 
-vim.keymap.set({"n", "x"}, "<leader>rr", function ()
+vim.keymap.set({ "n", "x" }, "<leader>rr", function()
     local tele = require("telescope")
 
     tele.extensions.refactoring.refactors()
