@@ -23,7 +23,7 @@ require("lazy").setup({
     },
     change_detection = { notify = false },
     dev = {
-        path = "/home/kris/personal/KrisChambers",
+        path = "/home/kris/personal/nvim_plugins/",
         paterns = {},
         fallback = false
     }

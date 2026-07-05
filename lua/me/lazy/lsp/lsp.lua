@@ -64,10 +64,11 @@ return {
                     },
                 }
             },
-            --             {
-            --                 "ty",
-            --                 { capabilities = capabilities }
-            --             },
+            -- {
+            --     "ty",
+            --     { capabilities = capabilities }
+            -- },
+
             {
                 "pyright",
                 {
@@ -95,7 +96,7 @@ return {
             },
 
             {
-                "yamlls",
+                "yaml-language-server",
                 {
                     capabilities = capabilities,
                     settings = {
@@ -116,31 +117,31 @@ return {
                 }
             },
 
-            {
-                "rust_analyzer",
-                {
-                    capabilities = capabilities,
-                    settings = {
-                        ["rust-analyzer"] = {
-                            files = {
-                                watcher = "notify",
-                            },
-                            workspace = {
-                                excludeFolders = {
-                                    "target/riscv32imc-esp-espidf",
-                                    "target/**/deps"
-                                }
-                            },
-                        },
-                        cargo = {
-                            allFeatures = true,
-                        },
-                        checkOnSave = {
-                            command = "clippy", -- or "check" if you prefer
-                        },
-                    }
-                }
-            },
+            -- {
+            --     "rust_analyzer",
+            --     {
+            --         capabilities = capabilities,
+            --         settings = {
+            --             ["rust-analyzer"] = {
+            --                 files = {
+            --                     watcher = "notify",
+            --                 },
+            --                 workspace = {
+            --                     excludeFolders = {
+            --                         "target/riscv32imc-esp-espidf",
+            --                         "target/**/deps"
+            --                     }
+            --                 },
+            --             },
+            --             cargo = {
+            --                 allFeatures = true,
+            --             },
+            --             checkOnSave = {
+            --                 command = "clippy", -- or "check" if you prefer
+            --             },
+            --         }
+            --     }
+            -- },
 
             {
                 "hls",
@@ -165,6 +166,16 @@ return {
                         },
                     },
                 }
+            },
+
+            {
+                "cmake-language-server",
+                { capabilities = capabilities }
+            },
+            {
+                "clangd",
+                { capabilities = capabilities }
+
             }
         }
 

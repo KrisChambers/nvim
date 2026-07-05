@@ -10,7 +10,7 @@ return {
         require("nvim-treesitter.configs").setup({
             -- A list of parser names, or "all"
             ensure_installed = {
-                "vimdoc", "typescript", "c", "lua", "rust", "bash", "haskell",
+                "vimdoc", "typescript", "c", "lua", "rust", "bash", "haskell", 'row'
             },
             ignore_install = {},
             modules = {},
@@ -35,6 +35,12 @@ return {
                 -- Instead of true it can also be a list of languages
                 -- additional_vim_regex_highlighting = { "markdown" },
             },
+        })
+
+        vim.api.nvim_create_autocmd('VimEnter', {
+            callback = function ()
+                vim.treesitter.language.register('row','row')
+            end
         })
     end
 }

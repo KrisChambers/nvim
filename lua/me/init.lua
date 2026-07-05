@@ -167,58 +167,21 @@ local function print_plugins()
 end
 --print_plugins()  -- Comment or uncomment to toggle the output
 
--- Playing around with setting up my own layout
--- IDEA (kc): Can we get the screen resolution? For laptop vs big screen different layouts would apply
--- IDEA (kc): Can we make it so that is the "Base" layout. As in :q on any of those windows does a :qa or something?
--- IDEA (kc): Can we fix the buffer in the auxillary windows.
-function Create_layout()
-    local total_height = vim.api.nvim_win_get_height(0)
-    local total_width = vim.api.nvim_win_get_width(0)
-    local main_max_height = math.floor(total_height * 0.80)
-    local main_max_width = math.floor(total_width * 0.8)
+vim.opt.runtimepath:prepend('/home/kris/.config/tree-sitter-parsers/row')
 
+vim.treesitter.language.register('row', 'row')
 
+vim.filetype.add({
+    extension = {
+        row = 'row',
+    },
+})
 
-    local a = vim.api.nvim_get_current_win()
-    -- Adds at the top
-    vim.cmd(main_max_height .. 'split')
-    local b = vim.api.nvim_get_current_win()
-    -- Adds from the left
-    vim.cmd(main_max_width .. 'vsplit')
-    local c = vim.api.nvim_get_current_win()
+vim.api.nvim_create_autocmd({'BufRead', 'BufNewFile'}, {
+    pattern = {'*.row'},
+    callback = function (args)
+        vim.bo[args.buf].filetype = 'row'
+        vim.treesitter.start(args.buf)
+    end
 
-    vim.api.nvim_set_option_value("winfixheight", true, { scope = "local", win = a })
-    vim.api.nvim_set_option_value("winfixwidth", true, { scope = "local", win = a })
-    vim.api.nvim_set_option_value("winfixheight", true, { scope = "local", win = b })
-    vim.api.nvim_set_option_value("winfixwidth", true, { scope = "local", win = b })
-    vim.api.nvim_set_option_value("winfixheight", true, { scope = "local", win = c })
-    vim.api.nvim_set_option_value("winfixwidth", true, { scope = "local", win = c })
-
-    local original_buf = vim.api.nvim_win_get_buf(a)
-    local new_buffer = vim.api.nvim_create_buf(true, false)
-    vim.api.nvim_win_set_buf(c, new_buffer)
-    vim.api.nvim_win_set_buf(b, original_buf)
-
-    local term = vim.api.nvim_create_buf(true, false)
-    vim.api.nvim_win_set_buf(a, term)
-    vim.api.nvim_open_term(term, {})
-    -- Should have a layout like:
-    --  ----------------
-    --  |   c      | b |
-    --  |          |   |
-    --  ----------------
-    --  |      a       |
-    --  ---------------
-
-    -- local first_win = vim.api.nvim_get_current_win()
-    -- local second_win = vim.api.nvim_get_current_win()
-
-    --local buf = vim.api.nvim_create_buf(true, true)
-    --vim.api.nvim_win_set_buf(second_win, buf)
-
-    --vim.api.nvim_win_set_height(first_win, max_height)
-    --vim.api.nvim_set_option_value("winfixheight", true, { scope="local", win = first_win })
-end
--- Create_layout()
-
-
+})
