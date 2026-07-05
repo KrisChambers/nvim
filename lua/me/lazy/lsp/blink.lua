@@ -4,6 +4,7 @@
 return {
     'saghen/blink.cmp',
     dependencies = {
+        "saghen/blink.lib",
         --'rafamadriz/friendly-snippets',
     },
 
@@ -51,5 +52,10 @@ return {
         fuzzy = { implementation = "prefer_rust_with_warning" },
 
     },
+
+    build = function ()
+        -- This is required for V2
+        require("blink.cmp").build():pwait()
+    end,
     opts_extend = { "sources.default" }
 }

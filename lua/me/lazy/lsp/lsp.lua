@@ -3,7 +3,7 @@ return {
     dependencies = {
         "williamboman/mason.nvim",
         "j-hui/fidget.nvim",
-        "saghen/blink.cmp",
+        -- "saghen/blink.cmp",
     },
 
     config = function()
@@ -18,7 +18,7 @@ return {
 
         --- @return lsp.ClientCapabilities
         local function get_blink_capabilities()
-            local blk_caps = require("blink.cmp").get_lsp_capabilities()
+            local blk_caps = { } -- require("blink.cmp").get_lsp_capabilities()
             local client_caps = client_capabilities()
 
             return vim.tbl_deep_extend("force", {}, blk_caps, client_caps)

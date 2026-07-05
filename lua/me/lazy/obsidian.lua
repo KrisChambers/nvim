@@ -28,10 +28,10 @@ return {
             enable = false,
             enabled = false
         },
-        completion = {
-            blink = true,
-            nvim_cmp = false
-        },
+        -- completion = {
+        --     blink = true,
+        --     nvim_cmp = false
+        -- },
         daily_notes = {
             folder = "daily_notes",
             workdays_only = false

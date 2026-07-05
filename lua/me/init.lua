@@ -169,7 +169,7 @@ end
 
 vim.opt.runtimepath:prepend('/home/kris/.config/tree-sitter-parsers/row')
 
-vim.treesitter.language.register('row', 'row')
+-- vim.treesitter.language.register('row', 'row')
 
 vim.filetype.add({
     extension = {
