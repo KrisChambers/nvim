@@ -40,8 +40,8 @@ vim.lsp.config("*", {
 })
 
 local servers = {
-    "lua_ls",   -- Lua language server
-    "nil_ls",      -- Nix Language server
+    "lua_ls", -- Lua language server
+    "nil_ls", -- Nix Language server
     --"bash",   -- Bash language server?
     -- ?
 }
